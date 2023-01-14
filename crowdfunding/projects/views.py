@@ -2,11 +2,11 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import Http404
-from rest_framework import status
+from rest_framework import status, generics
 
 #linking the serializer and the model
-from .models import Project
-from. serializers import ProjectSerializer
+from .models import Project, Pledge
+from. serializers import ProjectSerializer, PledgeSerializer
 
 # Create your views here.
 class ProjectList(APIView):
@@ -37,3 +37,7 @@ class ProjectDetail(APIView): #shows us specific details of the project
         project = self.get_object(pk)
         serializer = ProjectSerializer(project)
         return Response(serializer.data)
+
+class PledgeList(generics.ListCreateAPIView): #lists and creates the view. using 'generic' helps us create a form instead of showing it as a JSON. 
+    queryset = Pledge.objects.all()
+    serializer_class = PledgeSerializer
