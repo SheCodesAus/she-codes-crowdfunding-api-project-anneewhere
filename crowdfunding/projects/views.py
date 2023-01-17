@@ -19,7 +19,7 @@ class ProjectList(APIView):
     def post(self,request): #submitting the data. the request is specifically talking about the payload
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED) #status is imported from the django http stuff
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) #we don't have to write a "else" here because once it runs the if statement, and it successfuly runs the response, it won't do the other response. 
     
@@ -41,3 +41,6 @@ class ProjectDetail(APIView): #shows us specific details of the project
 class PledgeList(generics.ListCreateAPIView): #lists and creates the view. using 'generic' helps us create a form instead of showing it as a JSON. 
     queryset = Pledge.objects.all()
     serializer_class = PledgeSerializer
+
+    def perform_create(self, serializer): #this is kind of like model serializer where it does two things at once. this is the shorthand version of project version. 
+        serializer.save(supporter=self.request.user)

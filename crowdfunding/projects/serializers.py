@@ -15,7 +15,7 @@ class ProjectSerializer(serializers.Serializer):
     image = serializers.URLField()
     is_open = serializers.BooleanField()
     date_created = serializers.DateTimeField() #we don't add auto_now_add as the serializer only talks to the model 
-    owner = serializers.CharField(max_length=200)
+    owner = serializers.ReadOnlyField(source='owner_id')
 
     def create(self,validated_data): #the above links the serializer and model. but we haven't told it what to do.
         return Project.objects.create(**validated_data) #validated_data is a dictionary. ** means creates the values in pairs e.g. key=value. links value to key. (owner=ben)
@@ -25,6 +25,7 @@ class PledgeSerializer(serializers.ModelSerializer): #automated version of linki
         model = Pledge
         fields = '__all__'
         # fields = ['id', 'amount', 'comment', 'anonymous', 'project', 'supporter'] - is the manual way to do the above
+        read_only_fields = ['id', 'supporter']
 
 class ProjectDetailSerializer(ProjectSerializer):
     pledges = PledgeSerializer(many=True, read_only=True)
