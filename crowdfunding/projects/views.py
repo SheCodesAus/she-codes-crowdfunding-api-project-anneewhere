@@ -6,7 +6,7 @@ from rest_framework import status, generics
 
 #linking the serializer and the model
 from .models import Project, Pledge
-from. serializers import ProjectSerializer, PledgeSerializer
+from. serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer
 
 # Create your views here.
 class ProjectList(APIView):
@@ -35,7 +35,7 @@ class ProjectDetail(APIView): #shows us specific details of the project
 
     def get(self, request, pk): #this is will run
         project = self.get_object(pk)
-        serializer = ProjectSerializer(project)
+        serializer = ProjectDetailSerializer(project)
         return Response(serializer.data)
 
 class PledgeList(generics.ListCreateAPIView): #lists and creates the view. using 'generic' helps us create a form instead of showing it as a JSON. 

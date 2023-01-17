@@ -25,4 +25,6 @@ class PledgeSerializer(serializers.ModelSerializer): #automated version of linki
         model = Pledge
         fields = '__all__'
         # fields = ['id', 'amount', 'comment', 'anonymous', 'project', 'supporter'] - is the manual way to do the above
-        
+
+class ProjectDetailSerializer(ProjectSerializer):
+    pledges = PledgeSerializer(many=True, read_only=True)
