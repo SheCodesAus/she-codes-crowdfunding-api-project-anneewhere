@@ -12,6 +12,11 @@ from. serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSeria
 # Create your views here.
 class ProjectList(APIView):
 
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly,
+        ]
+
     def get(self, request): #self because it is a class
         projects = Project.objects.all() #collecting all the projects in this class
         serializer = ProjectSerializer(projects, many=True) #serializers need to know that there are many objects.
@@ -60,6 +65,11 @@ class ProjectDetail(APIView): #shows us specific details of the project
 class PledgeList(generics.ListCreateAPIView): #lists and creates the view. using 'generic' helps us create a form instead of showing it as a JSON. 
     queryset = Pledge.objects.all()
     serializer_class = PledgeSerializer
+
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly,
+        ]
 
     def perform_create(self, serializer): #this is kind of like model serializer where it does two things at once. this is the shorthand version of project version. 
         serializer.save(supporter=self.request.user)
