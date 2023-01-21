@@ -20,16 +20,6 @@ class ProjectSerializer(serializers.Serializer):
     def create(self,validated_data): #the above links the serializer and model. but we haven't told it what to do.
         return Project.objects.create(**validated_data) #validated_data is a dictionary. ** means creates the values in pairs e.g. key=value. links value to key. (owner=ben)
 
-class PledgeSerializer(serializers.ModelSerializer): #automated version of linking model and serializer
-    class Meta: #defines how the model form works.
-        model = Pledge
-        fields = '__all__'
-        # fields = ['id', 'amount', 'comment', 'anonymous', 'project', 'supporter'] - is the manual way to do the above
-        read_only_fields = ['id', 'supporter']
-
-class ProjectDetailSerializer(ProjectSerializer):
-    pledges = PledgeSerializer(many=True, read_only=True)
-
     def update(self, instance, validated_data): #instance refers to that specific thing
         instance.title = validated_data.get('title', instance.title)
         instance.description = validated_data.get('description', instance.description)
@@ -40,3 +30,13 @@ class ProjectDetailSerializer(ProjectSerializer):
         instance.owner = validated_data.get('owner', instance.owner)
         instance.save()
         return instance
+        
+class PledgeSerializer(serializers.ModelSerializer): #automated version of linking model and serializer
+    class Meta: #defines how the model form works.
+        model = Pledge
+        fields = '__all__'
+        # fields = ['id', 'amount', 'comment', 'anonymous', 'project', 'supporter'] - is the manual way to do the above
+        read_only_fields = ['id', 'supporter']
+
+class ProjectDetailSerializer(ProjectSerializer):
+    pledges = PledgeSerializer(many=True, read_only=True)
