@@ -15,8 +15,11 @@ class CustomUserSerializer(serializers.Serializer):
 class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'name', 'email', 'profile_picture', 'password']
-        extra_kwargs = {'password': {'write_only':True}}
+        fields = ['id', 'username', 'name', 'email', 'profile_picture', 'password']
+        extra_kwargs = { #kwargs= keyword arguments
+            'password': {'write_only':True},
+            'email': {'allow_blank':True, 'required':True}
+            }
 
     def create(self, validated_data):
         user = CustomUser(
@@ -26,7 +29,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
         user.set_password(validated_data['password'])
         user.save()
-        return CustomUser
+        return user #returned the defined user.
 
 class ChangePasswordSerializer(serializers.Serializer):
     model = CustomUser

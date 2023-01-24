@@ -33,12 +33,17 @@ class CustomUserDetail(APIView):
         serializer = CustomUserSerializer(user)
         return Response(serializer.data)
 
+    def put(self, request, pk):
+        user =self.get_object(pk)
+        data = request.data
+        
+        serializer = CustomUserSerializer(instance = user, data=data, partial=True)
+        
+        
 class ChangePasswordView(UpdateAPIView):
     """
     An endpoint for changing password.
     """
-    serializer_class = ChangePasswordSerializer
-    model = CustomUser
     permission_classes = (IsAuthenticated,)
 
     def get_object(self, queryset=None):
@@ -53,6 +58,7 @@ class ChangePasswordView(UpdateAPIView):
             # Check old password
             if not self.object.check_password(serializer.data.get("old_password")):
                 return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+                
             # set_password also hashes the password that the user will get
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()

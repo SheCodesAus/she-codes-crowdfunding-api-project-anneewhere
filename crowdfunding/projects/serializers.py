@@ -32,7 +32,7 @@ class ProjectSerializer(serializers.Serializer):
         return instance
         
 class PledgeSerializer(serializers.ModelSerializer): #automated version of linking model and serializer
-supporter = serializer.serializermethodfield()
+    supporter = serializers.serializermethodfield()
 
 def get_supporter(self,object):
     if object.anonymous:
