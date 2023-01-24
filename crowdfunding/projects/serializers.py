@@ -32,11 +32,19 @@ class ProjectSerializer(serializers.Serializer):
         return instance
         
 class PledgeSerializer(serializers.ModelSerializer): #automated version of linking model and serializer
-    class Meta: #defines how the model form works.
-        model = Pledge
-        fields = '__all__'
-        # fields = ['id', 'amount', 'comment', 'anonymous', 'project', 'supporter'] - is the manual way to do the above
-        read_only_fields = ['id', 'supporter']
+supporter = serializer.serializermethodfield()
+
+def get_supporter(self,object):
+    if object.anonymous:
+        return "anonymous"
+    else:
+        return object.supporter.username
+
+class Meta: #defines how the model form works.
+    model = Pledge
+    fields = '__all__'
+    # fields = ['id', 'amount', 'comment', 'anonymous', 'project', 'supporter'] - is the manual way to do the above
+    read_only_fields = ['id', 'supporter']
 
 class ProjectDetailSerializer(ProjectSerializer):
     pledges = PledgeSerializer(many=True, read_only=True)
