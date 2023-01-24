@@ -17,6 +17,11 @@ class Project(models.Model):
         related_name='owner_projects' 
     )
 
+    liked_by = models.ManyToManyField(
+        User,
+        related_name='liked_projects'
+    ) #this is a many-to-many relationship. see screenshot to have a look at the cross reference table
+
 class Pledge(models.Model):
     amount = models.IntegerField()
     comment = models.CharField(max_length=200)

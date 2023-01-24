@@ -40,3 +40,4 @@ class PledgeSerializer(serializers.ModelSerializer): #automated version of linki
 
 class ProjectDetailSerializer(ProjectSerializer):
     pledges = PledgeSerializer(many=True, read_only=True)
+    # liked_by = CustomUserSerializer(many=True, read_only=True)
