@@ -2,17 +2,17 @@ from rest_framework import serializers
 from .models import CustomUser
 
 
-class CustomUserSerializer(serializers.Serializer):
-    id = serializers.ReadOnlyField()
-    name = serializers.CharField(max_length=100)
-    username = serializers.CharField(max_length=50)
-    email = serializers.EmailField()
-    profile_picture = serializers.URLField(blank=True, null=True)
+# class CustomUserSerializer(serializers.Serializer):
+#     id = serializers.ReadOnlyField()
+#     name = serializers.CharField(max_length=100)
+#     username = serializers.CharField(max_length=50)
+#     email = serializers.EmailField()
+#     profile_picture = serializers.URLField()
 
-    def create(self, validated_data):
-        return CustomUser.objects.create(**validated_data)
+#     def create(self, validated_data):
+#         return CustomUser.objects.create(**validated_data)
 
-class CreateUserSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'name', 'email', 'profile_picture', 'password']

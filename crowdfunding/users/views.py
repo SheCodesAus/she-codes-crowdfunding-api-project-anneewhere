@@ -1,7 +1,7 @@
 from django.http import Http404
-from rest_framework.views import APIView, UpdateAPIView
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 
 from .models import CustomUser
@@ -37,10 +37,10 @@ class CustomUserDetail(APIView):
         user =self.get_object(pk)
         data = request.data
         
-        serializer = CustomUserSerializer(instance = user, data=data, partial=True)
+        serializer = CustomUserSerializer(instance=user, data=data, partial=True)
         
         
-class ChangePasswordView(UpdateAPIView):
+class ChangePasswordView(generics.UpdateAPIView):
     """
     An endpoint for changing password.
     """
@@ -58,7 +58,7 @@ class ChangePasswordView(UpdateAPIView):
             # Check old password
             if not self.object.check_password(serializer.data.get("old_password")):
                 return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
-                
+
             # set_password also hashes the password that the user will get
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
