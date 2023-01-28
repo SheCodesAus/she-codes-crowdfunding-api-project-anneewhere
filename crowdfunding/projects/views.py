@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.http import Http404
 from rest_framework import status, generics, permissions
 from .permissions import IsOwnerOrReadOnly
+from django_filters.rest_framework import DjangoFilterBackend
 
 # from django.http import HttpResponseNotFound
 # import json
@@ -13,7 +14,6 @@ from .models import Project, Pledge
 from. serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer
 
 class ProjectList(APIView):
-
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly,
@@ -72,6 +72,14 @@ class PledgeList(generics.ListCreateAPIView): #lists and creates the view. using
         permissions.IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly,
         ]
+
+    filter_backends=[DjangoFilterBackend]
+    filterset_fields=['supporter']
+
+    def get(self,request):
+        pledges = self.filter_queryset(self.get_queryset()) #looks through all the supporters
+        serializer = self.get_serializer(pledges, many=True)
+        return Response(serializer.data)
 
     def perform_create(self, serializer): #this is kind of like model serializer where it does two things at once. this is the shorthand version of project version. 
         serializer.save(supporter=self.request.user)
