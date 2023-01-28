@@ -91,7 +91,7 @@ class PledgeList(generics.ListCreateAPIView): #lists and creates the view. using
     def perform_create(self, serializer): #this is kind of like model serializer where it does two things at once. this is the shorthand version of project version. 
         serializer.save(supporter=self.request.user)
 
-class PledgeDetail(generics.RetrieveDestroyAPIView):
+class PledgeDetail(generics.RetrieveUpdateDestroyAPIView): #this api already gives option to update and retrieve. added delete to this view. 
     queryset=Pledge.objects.all()
     serializer_class = PledgeSerializer
 
