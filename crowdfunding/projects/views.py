@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import Http404
 from rest_framework import status, generics, permissions
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsSupporterOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 
 # from django.http import HttpResponseNotFound
@@ -77,7 +77,7 @@ class PledgeList(generics.ListCreateAPIView): #lists and creates the view. using
 
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly,
+        IsSupporterOrReadOnly,IsOwnerOrReadOnly
         ]
 
     filter_backends=[DjangoFilterBackend]
@@ -90,3 +90,17 @@ class PledgeList(generics.ListCreateAPIView): #lists and creates the view. using
 
     def perform_create(self, serializer): #this is kind of like model serializer where it does two things at once. this is the shorthand version of project version. 
         serializer.save(supporter=self.request.user)
+
+class PledgeDetail(generics.RetrieveDestroyAPIView):
+    queryset=Pledge.objects.all()
+    serializer_class = PledgeSerializer
+
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        IsSupporterOrReadOnly,
+        ]
+
+    def delete(self, request, *args, **kwargs): 
+        pledge = Pledge.objects.get(pk=kwargs.get('pk',None))
+        generics.RetrieveUpdateDestroyAPIView.delete(self, request, *args, **kwargs)
+        return Response(status=status.HTTP_204_NO_CONTENT)
