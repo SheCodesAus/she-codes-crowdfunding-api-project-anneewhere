@@ -76,10 +76,10 @@ class PledgeList(generics.ListCreateAPIView): #lists and creates the view. using
     filter_backends=[DjangoFilterBackend]
     filterset_fields=['supporter']
 
-    def get(self,request):
-        pledges = self.filter_queryset(self.get_queryset()) #looks through all the supporters
-        serializer = self.get_serializer(pledges, many=True)
-        return Response(serializer.data)
+    # def get(self,request):
+    #     pledges = self.filter_queryset(self.get_queryset()) #looks through all the supporters
+    #     serializer = self.get_serializer(pledges, many=True)
+    #     return Response(serializer.data)
 
     def perform_create(self, serializer): #this is kind of like model serializer where it does two things at once. this is the shorthand version of project version. 
         serializer.save(supporter=self.request.user)
