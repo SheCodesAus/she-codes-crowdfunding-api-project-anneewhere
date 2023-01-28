@@ -13,25 +13,44 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Project, Pledge
 from. serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer
 
-class ProjectList(APIView):
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly,
-        ]
+# class ProjectList(APIView):
+#     permission_classes = [
+#         permissions.IsAuthenticatedOrReadOnly,
+#         IsOwnerOrReadOnly,
+#         ]
 
-    def get(self, request): #self because it is a class
-        projects = Project.objects.all() #collecting all the projects in this class
-        serializer = ProjectSerializer(projects, many=True) #serializers need to know that there are many objects.
-        return Response(serializer.data)
+#     def get(self, request): #self because it is a class
+#         projects = Project.objects.all() #collecting all the projects in this class
+#         serializer = ProjectSerializer(projects, many=True) #serializers need to know that there are many objects.
+#         return Response(serializer.data)
     
-    def post(self,request): #submitting the data. the request is specifically talking about the payload
-        serializer = ProjectSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(owner=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED) #status is imported from the django http stuff
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) #we don't have to write a "else" here because once it runs the if statement, and it successfuly runs the response, it won't do the other response. 
+#     def post(self,request): #submitting the data. the request is specifically talking about the payload
+#         serializer = ProjectSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save(owner=request.user)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED) #status is imported from the django http stuff
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) #we don't have to write a "else" here because once it runs the if statement, and it successfuly runs the response, it won't do the other response. 
     
-    #when you run the above post, you can post raw JSON file using the URL. 
+#     #when you run the above post, you can post raw JSON file using the URL. 
+
+class ProjectList(generics.ListCreateAPIView):
+# https://www.cdrf.co/3.1/rest_framework.generics/ListCreateAPIView.html
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+
+    permission_classes = [
+    permissions.IsAuthenticatedOrReadOnly,
+    IsOwnerOrReadOnly,
+    ]
+
+    filter_backends=[DjangoFilterBackend]
+    filterset_fields=['is_open',]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
 class ProjectDetail(APIView): #shows us specific details of the project
 
