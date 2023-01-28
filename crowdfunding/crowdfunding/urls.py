@@ -16,6 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
+from django.http import JsonResponse
+
+def custom404(request, exception=None):
+    return JsonResponse({
+        'status_code': 404,
+        'error': 'Testing line'
+    })
+
+handler404 = custom404
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,3 +33,5 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path("", include('projects.urls')), #the empty string means match everything first?? unsure... what T^T
 ]
+
+

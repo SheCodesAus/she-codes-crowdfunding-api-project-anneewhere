@@ -5,11 +5,13 @@ from django.http import Http404
 from rest_framework import status, generics, permissions
 from .permissions import IsOwnerOrReadOnly
 
+# from django.http import HttpResponseNotFound
+# import json
+
 #linking the serializer and the model
 from .models import Project, Pledge
 from. serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer
 
-# Create your views here.
 class ProjectList(APIView):
 
     permission_classes = [
@@ -44,7 +46,7 @@ class ProjectDetail(APIView): #shows us specific details of the project
             self.check_object_permissions(self.request, project)
             return project        
         except Project.DoesNotExist:
-            raise Http404 #when we raise an error, django knows how to handle it.
+            raise Http404
 
     def get(self, request, pk): #this is will run
         project = self.get_object(pk)

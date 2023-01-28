@@ -10,3 +10,4 @@ urlpatterns = [
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns) #format_suffix_patterns helps django format patterns properly?
+
