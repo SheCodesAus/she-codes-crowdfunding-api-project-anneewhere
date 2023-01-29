@@ -27,8 +27,9 @@ SECRET_KEY = os.environ.get(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") !="False"
+DEBUG = False
 
-ALLOWED_HOSTS = ['lingering-cherry-4280.fly.dev']
+ALLOWED_HOSTS = ['lingering-cherry-4280.fly.dev', '127.0.0.1', 'localhost']
 CORS_ALLOW_ALL_ORIGINS = True
 CSRF_TRUSTED_ORIGINS = ['https://*.fly.dev']
 
@@ -45,7 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users.apps.UsersConfig'
+    'users.apps.UsersConfig',
+    'django_filters'
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'

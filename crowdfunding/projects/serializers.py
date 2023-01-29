@@ -5,6 +5,7 @@
 from rest_framework import serializers
 
 from .models import Project, Pledge
+from users.serializers import CustomUserSerializer
 
 #this is a manual way to create a serialiser for Project Models. We can create like a automated way to create serializers for each model created
 class ProjectSerializer(serializers.Serializer):
@@ -16,6 +17,7 @@ class ProjectSerializer(serializers.Serializer):
     is_open = serializers.BooleanField()
     date_created = serializers.DateTimeField() #we don't add auto_now_add as the serializer only talks to the model 
     owner = serializers.ReadOnlyField(source='owner_id')
+    total = serializers.ReadOnlyField()
 
     def create(self,validated_data): #the above links the serializer and model. but we haven't told it what to do.
         return Project.objects.create(**validated_data) #validated_data is a dictionary. ** means creates the values in pairs e.g. key=value. links value to key. (owner=ben)
@@ -25,26 +27,26 @@ class ProjectSerializer(serializers.Serializer):
         instance.description = validated_data.get('description', instance.description)
         instance.goal = validated_data.get('goal', instance.goal)
         instance.image = validated_data.get('image', instance.image)
-        instance.is_open = validated_data.get('is_open", instance.is_open')
+        instance.is_open = validated_data.get('is_open', instance.is_open)
         instance.date_created = validated_data.get('date_created', instance.date_created)
         instance.owner = validated_data.get('owner', instance.owner)
         instance.save()
         return instance
         
 class PledgeSerializer(serializers.ModelSerializer): #automated version of linking model and serializer
-supporter = serializer.serializermethodfield()
+    class Meta: #defines how the model form works.
+        model = Pledge
+        # fields = '__all__'
+        fields = ['id', 'amount', 'comment', 'anonymous', 'project', 'supporter']
+        read_only_fields = ['id', 'supporter']
 
+supporter = serializers.SerializerMethodField()
 def get_supporter(self,object):
     if object.anonymous:
         return "anonymous"
     else:
         return object.supporter.username
 
-class Meta: #defines how the model form works.
-    model = Pledge
-    fields = '__all__'
-    # fields = ['id', 'amount', 'comment', 'anonymous', 'project', 'supporter'] - is the manual way to do the above
-    read_only_fields = ['id', 'supporter']
-
 class ProjectDetailSerializer(ProjectSerializer):
     pledges = PledgeSerializer(many=True, read_only=True)
+    liked_by = CustomUserSerializer(many=True, read_only=True)

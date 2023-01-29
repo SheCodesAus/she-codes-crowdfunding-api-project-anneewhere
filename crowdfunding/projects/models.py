@@ -16,6 +16,14 @@ class Project(models.Model):
         on_delete=models.CASCADE,
         related_name='owner_projects' 
     )
+    liked_by = models.ManyToManyField(
+        User,
+        related_name='liked_projects'
+    )
+
+    @property #a function that applies to a function?
+    def total(self):
+        return self.pledges.aggregate(sum=models.Sum('amount'))['sum']
 
 class Pledge(models.Model):
     amount = models.IntegerField()
@@ -27,3 +35,4 @@ class Pledge(models.Model):
         on_delete=models.CASCADE, #cascade deletes everything underneath +/or related to this. 
         related_name='supporter_pledges'
     )
+

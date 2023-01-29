@@ -3,33 +3,54 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import Http404
 from rest_framework import status, generics, permissions
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsSupporterOrReadOnly
+from django_filters.rest_framework import DjangoFilterBackend
+
+# from django.http import HttpResponseNotFound
+# import json
 
 #linking the serializer and the model
 from .models import Project, Pledge
 from. serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer
 
-# Create your views here.
-class ProjectList(APIView):
+# class ProjectList(APIView):
+#     permission_classes = [
+#         permissions.IsAuthenticatedOrReadOnly,
+#         IsOwnerOrReadOnly,
+#         ]
+
+#     def get(self, request): #self because it is a class
+#         projects = Project.objects.all() #collecting all the projects in this class
+#         serializer = ProjectSerializer(projects, many=True) #serializers need to know that there are many objects.
+#         return Response(serializer.data)
+    
+#     def post(self,request): #submitting the data. the request is specifically talking about the payload
+#         serializer = ProjectSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save(owner=request.user)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED) #status is imported from the django http stuff
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) #we don't have to write a "else" here because once it runs the if statement, and it successfuly runs the response, it won't do the other response. 
+    
+#     #when you run the above post, you can post raw JSON file using the URL. 
+
+class ProjectList(generics.ListCreateAPIView):
+# https://www.cdrf.co/3.1/rest_framework.generics/ListCreateAPIView.html
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
 
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly,
-        ]
+    permissions.IsAuthenticatedOrReadOnly,
+    IsOwnerOrReadOnly,
+    ]
 
-    def get(self, request): #self because it is a class
-        projects = Project.objects.all() #collecting all the projects in this class
-        serializer = ProjectSerializer(projects, many=True) #serializers need to know that there are many objects.
-        return Response(serializer.data)
-    
-    def post(self,request): #submitting the data. the request is specifically talking about the payload
-        serializer = ProjectSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(owner=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED) #status is imported from the django http stuff
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) #we don't have to write a "else" here because once it runs the if statement, and it successfuly runs the response, it won't do the other response. 
-    
-    #when you run the above post, you can post raw JSON file using the URL. 
+    filter_backends=[DjangoFilterBackend]
+    filterset_fields=['is_open',]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
 class ProjectDetail(APIView): #shows us specific details of the project
 
@@ -44,7 +65,7 @@ class ProjectDetail(APIView): #shows us specific details of the project
             self.check_object_permissions(self.request, project)
             return project        
         except Project.DoesNotExist:
-            raise Http404 #when we raise an error, django knows how to handle it.
+            raise Http404
 
     def get(self, request, pk): #this is will run
         project = self.get_object(pk)
@@ -61,6 +82,13 @@ class ProjectDetail(APIView): #shows us specific details of the project
         )
         if serializer.is_valid():
             serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+
+    def delete(self, request, pk):
+        snippet = self.get_object(pk)
+        snippet.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class PledgeList(generics.ListCreateAPIView): #lists and creates the view. using 'generic' helps us create a form instead of showing it as a JSON. 
     queryset = Pledge.objects.all()
@@ -68,8 +96,30 @@ class PledgeList(generics.ListCreateAPIView): #lists and creates the view. using
 
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly,
+        IsSupporterOrReadOnly,IsOwnerOrReadOnly
         ]
+
+    filter_backends=[DjangoFilterBackend]
+    filterset_fields=['supporter']
+
+    # def get(self,request):
+    #     pledges = self.filter_queryset(self.get_queryset()) #looks through all the supporters
+    #     serializer = self.get_serializer(pledges, many=True)
+    #     return Response(serializer.data)
 
     def perform_create(self, serializer): #this is kind of like model serializer where it does two things at once. this is the shorthand version of project version. 
         serializer.save(supporter=self.request.user)
+
+class PledgeDetail(generics.RetrieveUpdateDestroyAPIView): #this api already gives option to update and retrieve. added delete to this view. 
+    queryset=Pledge.objects.all()
+    serializer_class = PledgeSerializer
+
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        IsSupporterOrReadOnly,
+        ]
+
+    def delete(self, request, *args, **kwargs): 
+        pledge = Pledge.objects.get(pk=kwargs.get('pk',None))
+        generics.RetrieveUpdateDestroyAPIView.delete(self, request, *args, **kwargs)
+        return Response(status=status.HTTP_204_NO_CONTENT)
